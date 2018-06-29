@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>Ocrad Test</title>
+	<script src="ocrad.js"></script>
+	<style type="text/css">
+	.sketchpad{
+		width: 500px;
+		margin: 0 auto;
+	}
+	.sketchpad canvas{
+		border: 3px dashed #ddd;
+		margin: 10px;
+	}
+	.btns{
+		width: 500px;
+		margin: 0 auto;
+		text-align: center;		
+	}
+	.btns button{
+		border-radius: 5px;
+		height: 30px;width: 100px;
+		box-shadow: none;
+		border: none;
+    	background: #00BCD4;
+    	color: #fff;
+    	-webkit-transition: all ease-in-out .15s;
+	    -o-transition: all ease-in-out .15s;
+	    transition: all ease-in-out .15s;
+	}
+	.btns button:hover{
+		background: #2196f3;
+	}
+	.text{
+		font-family: arial;
+		font-size: 100px;
+		line-height: 100px;
+		min-width: 100px; min-height: 100px;
+		background-color: #fff59e;
+		position: absolute;
+		top: 10px;
+		left: calc(50% + 170px);
+	}
+	</style>
+</head>
+<body>
+	<div class="sketchpad">
+		<canvas id="canvas" width="500" height="500"></canvas>
+	</div>
+	<div class="btns">
+		<button onclick="Recog()">Recog</button>
+		<button onclick="clearCanvas()">Clear</button>
+	</div>
+	<div id="text" class="text"></div>
+</body>
+<script type="text/javascript">
+	var canvas = document.getElementById('canvas');
+	var context = canvas.getContext('2d');
+ 	var drag = false, lastX, lastY;
+	canvas.onmousedown = function(e){ 
+		drag = true; lastX = 0; lastY = 0; e.preventDefault(); canvas.onmousemove(e); 
+	}
+	canvas.onmouseup   = function(e){
+	 	drag = false; e.preventDefault(); 
+	 	Recog();
+	}
+	canvas.onmousemove = function(e){
+	    e.preventDefault()
+	    var rect = canvas.getBoundingClientRect();
+	    var r = 10;
+	    function dot(x, y){
+	        context.beginPath()
+	        context.moveTo(x + r, y)
+	        context.arc(x, y, r, 0, Math.PI * 2)
+	        context.fill()
+	    }
+	    if(drag){
+	        var x = e.clientX - rect.left;
+	        var y = e.clientY - rect.top;
+	        if(lastX && lastY){
+	            var dx = x - lastX, dy = y - lastY;
+	            var d = Math.sqrt(dx * dx + dy * dy);
+	            for(var i = 1; i < d; i += 2){
+	                dot(lastX + dx / d * i, lastY + dy / d * i)
+	            }
+	        }
+	        dot(x, y);
+	        lastX = x;
+	        lastY = y;
+	    }
+	}
+    function clearCanvas(){
+	    context.fillStyle = 'white';
+	    context.fillRect(0, 0, canvas.width, canvas.height);
+	    context.fillStyle = 'black';
+	    document.getElementById("text").innerText = "";
+	}
+	function Recog(){
+	    var string = OCRAD(canvas);
+	    console.log(string);
+	    document.getElementById("text").innerText = string;
+	}
+</script>
+</html>
